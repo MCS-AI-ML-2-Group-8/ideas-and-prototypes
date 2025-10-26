@@ -44,3 +44,13 @@ uv run main.py
 ```sh
 uv run main.py --ui
 ```
+
+### Build standalone on Windows
+
+1. Install Windows SDK (use Visual Studio Installer)
+2. Open "x64 Native Tools Command Prompt"
+3. Activate environment `.venv\Scripts\activate`
+
+```
+nuitka main.py --standalone --msvc=latest --enable-plugin=pyside6 --include-qt-plugins=sensible,platforms
+```
