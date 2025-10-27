@@ -45,6 +45,21 @@ uv run main.py
 uv run main.py --ui
 ```
 
+#### API server
+
+API is avaialble at: http://127.0.0.1:8000 \
+Swagger endpoint at: http://127.0.0.1:8000/docs
+
+```sh
+uv run main.py --api
+```
+
+or
+
+```sh
+uv run fastapi dev api.py
+```
+
 ### Build standalone on Windows
 
 1. Install Windows SDK (use Visual Studio Installer)
