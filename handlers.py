@@ -114,7 +114,7 @@ def show_birthday(book: AddressBook, args: List) -> Tuple[Result, str]:
 
 
 @handle_domain_error
-def get_upcoming_birthdays(book: AddressBook) -> Tuple[Result, str]:
+def get_upcoming_birthdays(book: AddressBook, args: list) -> Tuple[Result, str]:
     reminders = book.get_upcoming_birthdays(days_before_reminder=7)
     if len(reminders):
         result = [f"{reminder.name}: {reminder.date}" for reminder in reminders]
@@ -123,7 +123,7 @@ def get_upcoming_birthdays(book: AddressBook) -> Tuple[Result, str]:
         return Result.WARNING, "There is no upcoming birthdays this week"
 
 
-def get_all(book: AddressBook) -> Tuple[Result, str]:
+def get_all(book: AddressBook, args: list) -> Tuple[Result, str]:
     """
     Returns all contacts from address book.
     Returns tuple: status, contacts text representation

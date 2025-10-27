@@ -1,3 +1,5 @@
+from typing import Callable
+from contacts.book import AddressBook
 from handlers import Result, add_birthday, add_contact, change_contact, get_all, get_phones, get_upcoming_birthdays, show_birthday
 from output import print_assistant_message, print_status_message
 from serialization import load_data, save_data
@@ -24,9 +26,18 @@ class CommandAutoSuggest(AutoSuggest):
                 return Suggestion(cmd[len(text):])
         
         return None
-    
-commands = ["hello", "add", "change", "phone", "add-birthday", "show-birthday", "birthdays", "all", "close", "exit"]
 
+handlers: dict[str, Callable[[AddressBook, list[str]], tuple[Result, str]]] = {
+    "add": add_contact,
+    "change": change_contact,
+    "phone": get_phones,
+    "add-birthday": add_birthday,
+    "show-birthday": show_birthday,
+    "birthdays": get_upcoming_birthdays,
+    "all": get_all
+}
+    
+commands = [*handlers, "hello", "exit", "close"]
 completer = WordCompleter(
     commands,
     ignore_case=True,
@@ -38,14 +49,13 @@ style = Style.from_dict({
     'pygments.suggestion': '#666666',
 })
 
-def parse_input(user_input):
+def parse_input(user_input) -> tuple[str, list[str]]:
     if not user_input:
-        return [""]
+        return "", []
 
     cmd, *args = user_input.split()
     cmd = cmd.strip().lower()
-    return cmd, *args
-
+    return cmd, args
 
 def launch_main_loop(filename):
     book = load_data(filename)
@@ -59,7 +69,7 @@ def launch_main_loop(filename):
             print_assistant_message("Ok, bye!")
             break
 
-        command, *args = parse_input(user_input)
+        command, args = parse_input(user_input)
         if command in ["exit", "close"]:
             print_assistant_message("Good bye!")
             break
@@ -67,35 +77,16 @@ def launch_main_loop(filename):
         elif command == "hello":
             print_assistant_message("How can I help you?")
 
-        elif command == "add":
-            status, message = add_contact(book, args)
-            print_status_message(status, message)
-
-        elif command == "change":
-            status, message = change_contact(book, args)
-            print_status_message(status, message)
-
-        elif command == "phone":
-            status, message = get_phones(book, args)
-            print_status_message(status, message)
-
-        elif command == "add-birthday":
-            status, message = add_birthday(book, args)
-            print_status_message(status, message)
-
-        elif command == "show-birthday":
-            status, message = show_birthday(book, args)
-            print_status_message(status, message)
-
-        elif command == "birthdays":
-            status, message = get_upcoming_birthdays(book)
-            print_status_message(status, message)
-
-        elif command == "all":
-            status, message = get_all(book)
+        elif command in handlers:
+            handler = handlers[command]
+            status, message = handler(book, args)
             print_status_message(status, message)
 
         else:
             print_status_message(Result.WARNING, "Invalid command. Available commands: hello, add, change, phone, add-birthday, show-birthday, birthdays, all, close, exit")
 
     save_data(book, filename)
+
+
+if __name__ == "__main__":
+    launch_main_loop("./data/addressbook.pkl") # For quick tests
